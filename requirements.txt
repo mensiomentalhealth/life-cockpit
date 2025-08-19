@@ -1,0 +1,13 @@
+# Core dependencies for Life Cockpit
+python-dotenv>=1.0.0
+pydantic>=2.5.0
+structlog>=23.2.0
+colorama>=0.4.6
+
+# Microsoft Graph API
+azure-identity>=1.15.0
+msgraph-sdk>=1.0.0
+
+# HTTP and utilities
+requests>=2.31.0
+rich>=13.7.0
