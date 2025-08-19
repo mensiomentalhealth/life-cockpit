@@ -11,23 +11,20 @@ Usage:
     python dataverse/list_tables.py
 """
 
+import asyncio
 import sys
-from pathlib import Path
+from typing import List, Dict, Any
 
-# Add the project root to the Python path
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
-
-from auth.graph import test_graph_connection
 from utils.config import get_config
-from utils.logger import setup_logging, get_logger
+from utils.logger import get_logger, setup_logging
+from auth.graph import test_graph_connection
 
 logger = get_logger(__name__)
 
 
-def list_dataverse_tables():
+async def list_dataverse_tables() -> bool:
     """
-    List available tables in Dataverse environment.
+    List all tables in Dataverse.
     
     This is a placeholder for actual Dataverse SDK integration.
     For now, we'll test the Microsoft Graph API connection.
@@ -41,7 +38,7 @@ def list_dataverse_tables():
         
         # Test Microsoft Graph API connection first
         logger.info("Testing Microsoft Graph API connection...")
-        if test_graph_connection():
+        if await test_graph_connection():
             logger.info("✅ Microsoft Graph API connection successful!")
         else:
             logger.error("❌ Microsoft Graph API connection failed!")
@@ -99,7 +96,7 @@ def list_dataverse_tables():
         return False
 
 
-def main():
+async def main():
     """Main function to run the Dataverse table listing script."""
     try:
         # Setup logging
@@ -111,7 +108,7 @@ def main():
         logger.info("🚀 Starting Hello Dataverse script...")
         
         # List tables
-        success = list_dataverse_tables()
+        success = await list_dataverse_tables()
         
         if success:
             logger.info("🎉 Hello Dataverse script completed successfully!")
@@ -126,5 +123,5 @@ def main():
 
 
 if __name__ == "__main__":
-    exit_code = main()
+    exit_code = asyncio.run(main())
     sys.exit(exit_code)
