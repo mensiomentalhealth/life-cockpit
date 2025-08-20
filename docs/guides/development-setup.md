@@ -39,10 +39,13 @@ nano .env  # or your preferred editor
 python test_setup.py
 
 # Test authentication
-PYTHONPATH=/path/to/life-cockpit python auth/graph.py
+python blc.py auth test
+
+# Test Graph API
+python blc.py graph users
 
 # Test Dataverse connection
-PYTHONPATH=/path/to/life-cockpit python dataverse/list_tables.py
+python blc.py dataverse test
 ```
 
 ## 🔐 Authentication Setup
@@ -98,29 +101,68 @@ APP_VERSION=1.0.0
 
 ## 🧪 Testing Your Setup
 
-### Authentication Test
+### CLI Testing (Recommended)
 ```bash
-PYTHONPATH=/path/to/life-cockpit python auth/graph.py
+# Test authentication
+python blc.py auth test
+
+# Test Graph API access
+python blc.py graph users
+
+# Test organization info
+python blc.py graph org
+
+# Test Dataverse connection
+python blc.py dataverse test
 ```
 
 **Expected Output:**
 ```
 ✅ Basic authentication successful!
-✅ Token acquired successfully
 ✅ Organization access successful: [Your Organization]
-🎉 Graph API connection test completed successfully!
+👥 Found 73 users:
+  • [User Name] ([email])
+🏢 Organization: [Your Organization]
+   ID: [org-id]
+   Phone: [phone-number]
 ```
 
-### Dataverse Test
+### Manual Testing
 ```bash
-PYTHONPATH=/path/to/life-cockpit python dataverse/list_tables.py
+# Test authentication directly
+python auth/graph.py
+
+# Test Dataverse connection
+python dataverse/list_tables.py
 ```
 
-**Expected Output:**
+## 🖥️ CLI Usage
+
+### Available Commands
+
+```bash
+# Show version and help
+python blc.py --help
+python blc.py version
+
+# Authentication commands
+python blc.py auth test      # Test authentication
+python blc.py auth status    # Check token status
+
+# Graph API commands
+python blc.py graph users    # List users
+python blc.py graph org      # Show organization info
+
+# Dataverse commands
+python blc.py dataverse list # List tables
+python blc.py dataverse test # Test connection
 ```
-✅ Microsoft Graph API connection successful!
-✅ Dataverse table listing completed successfully!
-```
+
+### CLI Features
+- **Rich output** with colors and formatting
+- **Async support** for all operations
+- **Error handling** with proper exit codes
+- **Help system** with command documentation
 
 ## 🚨 Troubleshooting
 
@@ -162,17 +204,23 @@ export PYTHONPATH="/path/to/life-cockpit:$PYTHONPATH"
 - Check that app registration is properly configured
 - Ensure admin consent is granted
 
+#### 5. Dataverse 403 Error
+**Problem**: `"The user is not a member of the organization"`
+
+**Solution**:
+- This is expected if Dataverse environment is not configured
+- Dataverse requires separate environment setup
+- Use Graph API commands for now
+
 ## 🔧 Development Workflow
 
 ### Running Scripts
 ```bash
-# Always set PYTHONPATH for imports to work
-PYTHONPATH=/path/to/life-cockpit python script.py
+# Use CLI for most operations
+python blc.py [command] [action]
 
-# Or activate virtual environment and set path
-source .venv/bin/activate
-export PYTHONPATH="/path/to/life-cockpit:$PYTHONPATH"
-python script.py
+# Or run scripts directly with PYTHONPATH
+PYTHONPATH=/path/to/life-cockpit python script.py
 ```
 
 ### Adding New Dependencies
@@ -187,7 +235,7 @@ pip freeze > requirements.txt
 ### Testing Changes
 ```bash
 # Test authentication changes
-python auth/graph.py
+python blc.py auth test
 
 # Test configuration changes
 python -c "from utils.config import get_config; print(get_config())"
@@ -205,7 +253,7 @@ life-cockpit/
 │   └── graph.py        # Authentication manager
 ├── dataverse/          # Dataverse operations
 │   ├── __init__.py
-│   └── list_tables.py  # Table listing (mock)
+│   └── list_tables.py  # Table listing (httpx implementation)
 ├── utils/              # Shared utilities
 │   ├── __init__.py
 │   ├── config.py       # Configuration management
@@ -213,6 +261,7 @@ life-cockpit/
 ├── tests/              # Test suite
 ├── logs/               # Application logs
 ├── docs/               # Documentation
+├── blc.py              # CLI entry point
 ├── .env                # Environment variables (gitignored)
 ├── env.example         # Environment template
 ├── requirements.txt    # Python dependencies
@@ -223,10 +272,10 @@ life-cockpit/
 
 After completing setup:
 
-1. **Implement real Dataverse connection** (replace mock data)
-2. **Add CLI interface** for easier testing
-3. **Build first workflow module** (email automation)
-4. **Add more comprehensive tests**
+1. **Configure Dataverse environment** (if needed)
+2. **Build workflow modules** (email automation, reminders)
+3. **Add more CLI commands** for business operations
+4. **Implement automation workflows**
 
 ## 📚 Additional Resources
 
@@ -235,7 +284,9 @@ After completing setup:
 - [Roadmap](../roadmap.md) - Development phases and goals
 - [Microsoft Graph API Documentation](https://docs.microsoft.com/en-us/graph/)
 - [Azure Identity Documentation](https://docs.microsoft.com/en-us/python/api/overview/azure/identity-readme)
+- [Typer CLI Documentation](https://typer.tiangolo.com/)
+- [httpx Documentation](https://www.python-httpx.org/)
 
 ---
 
-*Last Updated: August 19, 2025*
+*Last Updated: August 20, 2025*

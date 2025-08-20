@@ -2,6 +2,8 @@
 
 ## Overview
 
+**YOUR Personal Programmatic Life Management System**
+
 Life Cockpit is a layered, modular Python automation framework designed to replace GUI-based workflows with script-based automation in the Microsoft 365 ecosystem. The architecture emphasizes **terminal-driven verbs**, AI-assisted orchestration, and portable backends. The system prioritizes **modularity, security, and extensibility** while evolving from temporary scaffolding to durable systems.
 
 ### Strategic Vision
@@ -10,6 +12,7 @@ Life Cockpit is a layered, modular Python automation framework designed to repla
 - **AI-assisted orchestration** with human-in-the-loop (HITL) approval gates
 - **Portable backends** with replaceable dependencies (Swap-30 principle)
 - **Governance by design**: Idempotency, explainability, reversibility, and TTL for experiments
+- **Personal-first design**: Built for YOUR needs, YOUR patterns, YOUR life management
 
 ---
 
@@ -72,13 +75,20 @@ Life Cockpit is a layered, modular Python automation framework designed to repla
                     │  Execution Layer │
                     │                 │
                     │ ┌─────────────┐ │
+                    │ │   CLI       │ │
+                    │ │  (blc.py)   │ │
+                    │ └─────────────┘ │
+                    │ ┌─────────────┐ │
                     │ │   Terminal  │ │
+                    │ │   Commands  │ │
                     │ └─────────────┘ │
                     │ ┌─────────────┐ │
                     │ │    Cursor   │ │
+                    │ │   IDE       │ │
                     │ └─────────────┘ │
                     │ ┌─────────────┐ │
                     │ │   Webhooks  │ │
+                    │ │   (future)  │ │
                     │ └─────────────┘ │
                     └─────────────────┘
 ```
@@ -88,7 +98,8 @@ Life Cockpit is a layered, modular Python automation framework designed to repla
 ## Layers
 
 ### 1. Interface Layer
-- **Terminal (Core)**: Primary control via verbs (e.g., `blc report generate`, `blc reminder create`)
+- **CLI (Core)**: Primary control via Typer commands (e.g., `blc auth test`, `blc graph users`, `blc dataverse list`)
+- **Terminal (Core)**: Rich CLI interface with colors, emojis, and structured output
 - **Excel (Temporary UI)**: Initial visual scaffolding for PM and OPS. To be deprecated once Cockpit-native UI is ready
 - **Web (Client-Facing)**: React/SPA dashboards with auth (via Entra/Key Vault)
 - **AI Copilot Assistants**: Integrated copilots for prompts, templates, and explanations
