@@ -11,6 +11,7 @@ Usage:
 import asyncio
 import sys
 from pathlib import Path
+from typing import Optional
 
 import typer
 from rich.console import Console
@@ -103,7 +104,7 @@ def auth(
 
 @app.command()
 def dataverse(
-    action: str = typer.Argument(..., help="Action to perform: list, test")
+    action: str = typer.Argument(..., help="Action to perform: list, test, whoami")
 ):
     """Dataverse operations."""
     
@@ -113,47 +114,34 @@ def dataverse(
         if action == "list":
             console.print("[bold]Fetching Dataverse tables...[/bold]")
             
-            # Test Graph API first
-            auth_manager = get_auth_manager()
-            if not await auth_manager.test_connection():
-                console.print("❌ [red]Graph API authentication failed![/red]")
+            from dataverse.list_tables import list_dataverse_tables
+            success = await list_dataverse_tables()
+            if not success:
+                console.print("❌ [red]Failed to list Dataverse tables[/red]")
                 raise typer.Exit(1)
-            
-            # Get Dataverse tables
-            tables = await get_dataverse_tables()
-            
-            if tables:
-                console.print(f"📋 [green]Found {len(tables)} tables in Dataverse:[/green]")
-                for table in tables:
-                    console.print(f"  • {table['display_name']} ({table['name']})")
-                    if table['description']:
-                        console.print(f"    {table['description']}")
-                    console.print(f"    Type: {table['entity_type']}")
-            else:
-                console.print("⚠️ [yellow]No tables found or API call failed[/yellow]")
-                console.print("💡 This might be normal if your Dataverse environment is empty or not configured")
                 
         elif action == "test":
             console.print("[bold]Testing Dataverse connection...[/bold]")
             
-            # Test Graph API first
-            auth_manager = get_auth_manager()
-            if not await auth_manager.test_connection():
-                console.print("❌ [red]Graph API authentication failed![/red]")
-                raise typer.Exit(1)
-            
-            # Test Dataverse API
-            tables = await get_dataverse_tables()
-            if tables is not None:  # API call succeeded
-                console.print("✅ [green]Dataverse API connection successful![/green]")
-                console.print(f"   Found {len(tables)} tables")
+            from dataverse.list_tables import test_dataverse_connection
+            success = await test_dataverse_connection()
+            if success:
+                console.print("✅ [green]Dataverse connection successful![/green]")
             else:
-                console.print("❌ [red]Dataverse API connection failed![/red]")
-                console.print("💡 Check your Dataverse environment configuration")
+                console.print("❌ [red]Dataverse connection failed[/red]")
+                raise typer.Exit(1)
+                
+        elif action == "whoami":
+            console.print("[bold]Getting Dataverse user info...[/bold]")
+            
+            from dataverse.list_tables import test_dataverse_connection
+            success = await test_dataverse_connection()
+            if not success:
+                console.print("❌ [red]Failed to get Dataverse user info[/red]")
                 raise typer.Exit(1)
         else:
             console.print(f"❌ [red]Unknown action: {action}[/red]")
-            console.print("Available actions: list, test")
+            console.print("Available actions: list, test, whoami")
             raise typer.Exit(1)
     
     asyncio.run(run_dataverse())
