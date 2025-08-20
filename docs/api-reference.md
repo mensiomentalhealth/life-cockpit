@@ -39,6 +39,45 @@ Tests what permissions are actually granted in the token.
 ##### `get_current_user() -> Optional[dict]`
 Gets current user information (limited with client credentials flow).
 
+### `auth.dataverse.DataverseAuthManager`
+
+Main authentication manager for Dataverse Web API.
+
+#### Constructor
+```python
+DataverseAuthManager()
+```
+Creates a new Dataverse authentication manager instance.
+
+#### Methods
+
+##### `get_credential() -> ClientSecretCredential`
+Returns the Azure credential for authentication.
+
+##### `get_dataverse_url() -> str`
+Returns the configured Dataverse environment URL.
+
+##### `get_token(impersonate_user_id: Optional[str] = None) -> str`
+Gets access token for Dataverse API with optional user impersonation.
+
+**Parameters:**
+- `impersonate_user_id`: Optional user ID for audit attribution
+
+##### `test_connection(impersonate_user_id: Optional[str] = None) -> bool`
+Tests Dataverse API connection using WhoAmI endpoint.
+
+**Parameters:**
+- `impersonate_user_id`: Optional user ID for audit attribution
+
+##### `get_entity_definitions(impersonate_user_id: Optional[str] = None) -> List[Dict[str, Any]]`
+Gets all entity definitions from Dataverse.
+
+**Parameters:**
+- `impersonate_user_id`: Optional user ID for audit attribution
+
+**Returns:**
+- List of entity dictionaries with keys: `name`, `display_name`, `description`, `entity_type`
+
 ### `auth.graph.get_auth_manager() -> GraphAuthManager`
 Returns the global authentication manager instance (singleton).
 
@@ -50,17 +89,34 @@ Returns authenticated Graph service client.
 
 ## 📊 Dataverse Module (`dataverse/`)
 
-### `dataverse.list_tables.get_dataverse_tables() -> List[Dict[str, Any]]`
-Gets actual tables from Dataverse using Web API.
+### `dataverse.list_tables.test_dataverse_connection(impersonate_user_id: Optional[str] = None) -> bool`
+Tests Dataverse connection using WhoAmI endpoint.
+
+**Parameters:**
+- `impersonate_user_id`: Optional user ID for audit attribution
+
+**Returns:**
+- `True` if connection successful, `False` if failed
+
+### `dataverse.list_tables.get_dataverse_tables(impersonate_user_id: Optional[str] = None) -> List[Dict[str, Any]]`
+Gets all Dataverse tables/entities using the centralized auth manager.
+
+**Parameters:**
+- `impersonate_user_id`: Optional user ID for audit attribution
 
 **Returns:**
 - List of table dictionaries with keys: `name`, `display_name`, `description`, `entity_type`
 
-### `dataverse.list_tables.list_dataverse_tables() -> bool`
-Lists all tables in Dataverse using Web API.
+### `dataverse.list_tables.list_dataverse_tables(impersonate_user_id: Optional[str] = None) -> bool`
+Lists all tables in Dataverse with formatted output.
+
+**Parameters:**
+- `impersonate_user_id`: Optional user ID for audit attribution
 
 **Returns:**
 - `True` if successful, `False` if failed
+
+**Note:** This function prints formatted output to console showing custom and standard entities.
 
 ## ⚙️ Utilities Module (`utils/`)
 

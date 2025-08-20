@@ -236,6 +236,57 @@ Each ADR follows this format:
   - Private repository: Limited visibility and collaboration
   - Organization repository: More complex access management
 
+### [ADR-015] Centralized Authentication Architecture
+- **Status**: Accepted
+- **Date**: 2025-08-20
+- **Context**: Need consistent authentication patterns across Graph API and Dataverse API
+- **Decision**: Centralize all authentication logic in `auth/` module with consistent manager classes
+- **Consequences**:
+  - Consistent authentication patterns across all APIs
+  - Single place to update authentication logic
+  - Better code reusability and maintainability
+  - Clear separation of concerns (auth vs business logic)
+  - Easier testing and debugging
+  - Reduced code duplication
+- **Alternatives**:
+  - Duplicate auth logic in each module: More maintenance overhead
+  - Single monolithic auth class: Less flexible and harder to maintain
+  - External auth library: Additional dependency and complexity
+
+### [ADR-016] Dataverse Web API Integration
+- **Status**: Accepted
+- **Date**: 2025-08-20
+- **Context**: Need to integrate with Dataverse for data storage and management
+- **Decision**: Use Dataverse Web API directly with OAuth2 client credentials flow
+- **Consequences**:
+  - Direct access to Dataverse data without Graph API limitations
+  - Full CRUD operations on custom entities
+  - Proper audit attribution with MSCRMCallerID header
+  - Consistent authentication with Azure AD app registration
+  - Better performance for bulk operations
+  - Full control over data operations
+- **Alternatives**:
+  - Graph API for Dataverse: Limited functionality and performance
+  - Dataverse SDK: Additional dependency and less control
+  - Custom REST client: More development overhead
+
+### [ADR-017] Authentication Manager Pattern
+- **Status**: Accepted
+- **Date**: 2025-08-20
+- **Context**: Need consistent authentication patterns across different APIs
+- **Decision**: Use manager classes (GraphAuthManager, DataverseAuthManager) with consistent interfaces
+- **Consequences**:
+  - Consistent API across different authentication systems
+  - Easy to add new authentication providers
+  - Clear separation of credential management and API access
+  - Reusable authentication logic
+  - Better error handling and logging
+  - Simplified testing and mocking
+- **Alternatives**:
+  - Function-based auth: Less organized and harder to extend
+  - Single auth class: Too monolithic and inflexible
+  - External auth library: Additional dependency and less control
+
 ## Future ADRs
 
 As the project evolves, additional ADRs will be added for:

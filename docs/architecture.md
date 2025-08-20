@@ -46,6 +46,15 @@ Life Cockpit is a layered, modular Python automation framework designed to repla
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Authentication │    │   Configuration │    │     Logging     │
 │      (auth/)     │    │     (utils/)     │    │     (utils/)     │
+│                 │    │                 │    │                 │
+│ ┌─────────────┐ │    │ ┌─────────────┐ │    │ ┌─────────────┐ │
+│ │Graph Auth   │ │    │ │  Settings   │ │    │ │  Structured │ │
+│ │Manager      │ │    │ │  (Pydantic) │ │    │ │  Logging    │ │
+│ └─────────────┘ │    │ └─────────────┘ │    │ └─────────────┘ │
+│ ┌─────────────┐ │    │ ┌─────────────┐ │    │ ┌─────────────┐ │
+│ │Dataverse    │ │    │ │ Environment │ │    │ │  File       │ │
+│ │Auth Manager │ │    │ │  Variables  │ │    │ │  Rotation   │ │
+│ └─────────────┘ │    │ └─────────────┘ │    │ └─────────────┘ │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
          │                       │                       │
          └───────────────────────┼───────────────────────┘
@@ -56,6 +65,7 @@ Life Cockpit is a layered, modular Python automation framework designed to repla
                     │ ┌─────────────┐ │
                     │ │  Dataverse  │ │
                     │ │  (dataverse/)│ │
+                    │ │  Operations │ │
                     │ └─────────────┘ │
                     │ ┌─────────────┐ │
                     │ │   Sessions  │ │
@@ -77,6 +87,7 @@ Life Cockpit is a layered, modular Python automation framework designed to repla
                     │ ┌─────────────┐ │
                     │ │   CLI       │ │
                     │ │  (blc.py)   │ │
+                    │ │  (Typer)    │ │
                     │ └─────────────┘ │
                     │ ┌─────────────┐ │
                     │ │   Terminal  │ │
