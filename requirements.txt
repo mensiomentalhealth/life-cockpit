@@ -11,3 +11,7 @@ msgraph-sdk>=1.0.0
 # HTTP and utilities
 requests>=2.31.0
 rich>=13.7.0
+httpx>=0.25.0
+
+# CLI framework
+typer>=0.9.0
