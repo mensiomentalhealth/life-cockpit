@@ -30,6 +30,7 @@
 - **HITL Matrix**: Risk-based approvals gate dangerous actions.
 - **Freedom Floor**: Human override always possible.
 - **Personal Workflow**: YOUR daily patterns, YOUR business processes, YOUR life rhythms
+- **Model-Agnostic AI**: LLM provider flexibility with consistent compliance controls
 
 ## Example: Reminder System v1
 - Dry-run shows queued reminders.

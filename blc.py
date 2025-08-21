@@ -213,5 +213,46 @@ def graph(
     asyncio.run(run_graph())
 
 
+@app.command()
+def rollback(
+    action: str = typer.Argument(..., help="Action to perform: list, create, execute")
+):
+    """Rollback management operations."""
+    
+    from utils.rollback import get_rollback_manager
+    
+    rollback_manager = get_rollback_manager()
+    
+    if action == "list":
+        console.print("[bold]Rollback Points:[/bold]")
+        points = rollback_manager.list_points()
+        
+        if not points:
+            console.print("No rollback points found")
+            return
+        
+        for point_id, point_data in points.items():
+            console.print(f"  • {point_id}")
+            console.print(f"    Operation: {point_data['operation']}")
+            console.print(f"    Description: {point_data['description']}")
+            console.print(f"    Timestamp: {point_data['timestamp']}")
+            console.print()
+    
+    elif action == "create":
+        console.print("[bold]Creating rollback point...[/bold]")
+        # This would be used programmatically, not from CLI
+        console.print("Rollback points are created automatically during operations")
+    
+    elif action == "execute":
+        console.print("[bold]Rollback execution...[/bold]")
+        # This would be used programmatically, not from CLI
+        console.print("Rollback execution is handled automatically on failures")
+    
+    else:
+        console.print(f"❌ [red]Unknown action: {action}[/red]")
+        console.print("Available actions: list, create, execute")
+        raise typer.Exit(1)
+
+
 if __name__ == "__main__":
     app()

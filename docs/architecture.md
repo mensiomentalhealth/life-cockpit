@@ -128,9 +128,11 @@ Life Cockpit is a layered, modular Python automation framework designed to repla
 - **Action Log**: All actions/events logged with runID
 
 ### 4. AI Layer
+- **Model-Agnostic Design**: Support for Azure OpenAI, Google AI, Claude, and other providers
 - **Prompt Versioning**: Every template stored, versioned, and logged
 - **Rationale + Error Routing**: AI outputs rationale blocks; errors routed to triage queue
 - **Human-in-the-Loop (HITL)**: Approval gates for high-risk actions
+- **Compliance Controls**: Consistent security and audit requirements regardless of provider
 
 ### 5. Governance Layer
 - **Idempotency, Explainability, Reversibility**: Embedded in every action

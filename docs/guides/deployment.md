@@ -2,6 +2,113 @@
 
 This guide covers deployment strategies for Life Cockpit, from current local development to future production Azure services.
 
+## 🔄 CI/CD Pipeline
+
+### GitHub Actions Workflow
+
+Life Cockpit uses GitHub Actions for automated testing, security scanning, and deployment:
+
+#### Workflow Stages
+1. **Test** - Unit tests, linting, type checking
+2. **Security** - CodeQL security analysis
+3. **Deploy Staging** - Automatic deployment to staging (develop branch)
+4. **Deploy Production** - Manual deployment to production (main branch)
+
+#### Key Features
+- **Multi-Python Testing** - Tests against Python 3.11 and 3.12
+- **Code Quality** - Black, isort, mypy, flake8
+- **Security Scanning** - GitHub CodeQL analysis
+- **Coverage Reporting** - Codecov integration
+- **Environment Protection** - Staging and production environments
+
+#### Secrets Required
+```bash
+AZURE_CLIENT_ID=your_azure_client_id
+AZURE_CLIENT_SECRET=your_azure_client_secret
+AZURE_TENANT_ID=your_azure_tenant_id
+DATAVERSE_URL=your_dataverse_url
+```
+
+## 🛡️ Rollback & Idempotency
+
+### Rollback System
+
+Life Cockpit includes a comprehensive rollback system for safe deployments:
+
+#### Features
+- **Automatic Rollback Points** - Created before critical operations
+- **Time-based Expiration** - Rollback points expire after 30 days
+- **Dependency Management** - Handles dependent rollback operations
+- **Persistent Storage** - Rollback points stored in JSON format
+
+#### Supported Operations
+- **Dataverse Operations** - Create, update, delete with rollback
+- **Configuration Changes** - Config modifications with restoration
+- **Graph API Calls** - API operations with state tracking
+- **Workflow Deployments** - Workflow changes with rollback
+
+#### CLI Commands
+```bash
+# List rollback points
+python blc.py rollback list
+
+# Create rollback point (programmatic)
+python blc.py rollback create
+
+# Execute rollback (programmatic)
+python blc.py rollback execute
+```
+
+#### Programmatic Usage
+```python
+from utils.rollback import get_rollback_manager
+
+# Create rollback point
+rollback_manager = get_rollback_manager()
+point_id = rollback_manager.create_point(
+    operation="dataverse_create",
+    description="Create new client record",
+    data={"entity_name": "client", "entity_id": "123"}
+)
+
+# Automatic rollback on failure
+try:
+    # Perform operation
+    create_client_record()
+except Exception:
+    # Rollback automatically triggered
+    rollback_manager.rollback(point_id)
+```
+
+### Idempotency
+
+All operations in Life Cockpit are designed to be idempotent:
+
+#### Principles
+- **Safe Re-runs** - Operations can be safely re-executed
+- **State Checking** - Check current state before modifications
+- **Conditional Updates** - Only update if changes are needed
+- **Conflict Resolution** - Handle concurrent modifications
+
+#### Implementation
+```python
+# Example: Idempotent Dataverse update
+async def update_client_record(client_id: str, data: dict):
+    # Check current state
+    current = await get_client_record(client_id)
+    
+    # Only update if changes exist
+    if current != data:
+        # Create rollback point
+        rollback_id = create_rollback_point("dataverse_update", current)
+        
+        try:
+            await update_record(client_id, data)
+        except Exception:
+            await rollback(rollback_id)
+            raise
+```
+
 ## 🏠 Current Deployment: Local Development
 
 ### Git-Based Backup
@@ -307,134 +414,6 @@ az container create \
   --environment-variables \
     AZURE_CLIENT_ID=@azure-client-id \
     AZURE_TENANT_ID=@azure-tenant-id
-```
-
-## 🔄 CI/CD Pipeline
-
-### GitHub Actions Workflow
-```yaml
-# .github/workflows/deploy.yml
-name: Deploy to Azure
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pytest pytest-asyncio
-    
-    - name: Run tests
-      run: |
-        pytest tests/ -v
-    
-    - name: Run linting
-      run: |
-        pip install flake8 black
-        flake8 .
-        black --check .
-
-  deploy:
-    needs: test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: Deploy to Azure Functions
-      uses: Azure/functions-action@v1
-      with:
-        app-name: life-cockpit-functions
-        package: '.'
-        publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
-    
-    - name: Deploy to Azure Container Registry
-      uses: azure/docker-login@v1
-      with:
-        login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
-        username: ${{ secrets.REGISTRY_USERNAME }}
-        password: ${{ secrets.REGISTRY_PASSWORD }}
-    
-    - name: Build and push image
-      run: |
-        docker build -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/life-cockpit:${{ github.sha }} .
-        docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/life-cockpit:${{ github.sha }}
-```
-
-### Azure DevOps Pipeline
-```yaml
-# azure-pipelines.yml
-trigger:
-- main
-
-pool:
-  vmImage: 'ubuntu-latest'
-
-variables:
-  pythonVersion: '3.11'
-
-stages:
-- stage: Test
-  displayName: 'Test Stage'
-  jobs:
-  - job: Test
-    displayName: 'Run Tests'
-    steps:
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '$(pythonVersion)'
-    
-    - script: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pytest pytest-asyncio
-      displayName: 'Install dependencies'
-    
-    - script: |
-        pytest tests/ -v
-      displayName: 'Run tests'
-
-- stage: Deploy
-  displayName: 'Deploy Stage'
-  dependsOn: Test
-  condition: succeeded()
-  jobs:
-  - deployment: DeployFunctionApp
-    displayName: 'Deploy Function App'
-    environment: 'production'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: ArchiveFiles@2
-            inputs:
-              rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
-              includeRootFolder: false
-              archiveType: 'zip'
-              archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
-              replaceExistingArchive: true
-          
-          - task: AzureFunctionApp@1
-            inputs:
-              azureSubscription: 'Your-Azure-Subscription'
-              appName: 'life-cockpit-functions'
-              package: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
 ```
 
 ## 🔍 Monitoring and Logging

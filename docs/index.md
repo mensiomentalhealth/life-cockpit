@@ -40,6 +40,14 @@ Life Cockpit is designed around YOUR needs, YOUR patterns, YOUR goals. Every fea
 - [Principles](principles.md) - Project principles and philosophy
 
 ### **Development Guides**
+### **Compliance & Security**
+- [Compliance Framework](compliance.md) - HIPAA/PHIPA compliance framework
+- [Security Architecture](security.md) - Security architecture and practices
+- [Environment Management](environments.md) - Classification-based environment tiers
+- [CI/CD Strategy](cicd.md) - Minimal vs ultimate CI/CD pipelines
+- [Classification System](classification.md) - Verb classification system
+- [Safety Guardrails](guardrails.md) - Safety mechanisms and approval workflows
+- [AI Strategy](ai-strategy.md) - Model-agnostic AI integration and compliance
 - [Development Setup](guides/development-setup.md) - Environment setup
 - [Deployment](guides/deployment.md) - Deployment strategies and Azure services
 - [Contributing](contributing.md) - How to contribute (for future collaborators)
@@ -86,7 +94,7 @@ Life Cockpit is designed around YOUR needs, YOUR patterns, YOUR goals. Every fea
 - **Lines of Code**: 800+ lines
 - **Modules**: 4 core modules
 - **CLI Commands**: 8+ commands
-- **Documentation**: 15+ files
+- **Documentation: 25+ files
 - **Test Coverage**: Framework ready
 
 ## 🚨 Need Help?
