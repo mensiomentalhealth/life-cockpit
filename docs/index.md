@@ -14,6 +14,7 @@ Life Cockpit is designed around YOUR needs, YOUR patterns, YOUR goals. Every fea
 - **[Architecture](architecture.md)** - System design and architecture overview
 - **[Project Log](project_log.md)** - Development progress and lessons learned
 - **[Roadmap](roadmap.md)** - Project development timeline and goals
+- **[Templates](templates.md)** - Reusable content/payload templates
 - **[Development Setup](guides/development-setup.md)** - How to set up your development environment
 - **[Quick Start](examples/quick-start.md)** - Get up and running in 5 minutes
 - **[API Reference](api-reference.md)** - Complete API documentation
