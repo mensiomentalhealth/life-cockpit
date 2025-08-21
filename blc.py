@@ -405,9 +405,45 @@ def functions(
             console.print(f"Run ID: {run_id}")
             console.print(f"Result: {result}")
         
+        elif action == "test-message-processor":
+            from azure.message_processor import message_processor_cli
+            
+            console.print("[bold]Testing message processor...[/bold]")
+            result = await message_processor_cli.test_processing()
+            
+            if result.get('success', False):
+                console.print(f"✅ [green]Message processor test completed[/green]")
+                console.print(f"Processed: {result.get('processed_count', 0)}")
+                console.print(f"Success: {result.get('success_count', 0)}")
+                console.print(f"Failed: {result.get('failed_count', 0)}")
+                console.print(f"Run ID: {result.get('run_id', 'N/A')}")
+            else:
+                console.print(f"⚠️ [yellow]Message processor test requires approval[/yellow]")
+                console.print(f"Error: {result.get('error', 'Unknown error')}")
+                console.print(f"Run ID: {result.get('run_id', 'N/A')}")
+                console.print("Use 'python blc.py guardrails approve' to approve the operation")
+        
+        elif action == "test-dynamics-processor":
+            from azure.dynamics_message_processor import dynamics_message_processor_cli
+            
+            console.print("[bold]Testing Dynamics message processor...[/bold]")
+            result = await dynamics_message_processor_cli.test_processing()
+            
+            if result.get('success', False):
+                console.print(f"✅ [green]Dynamics message processor test completed[/green]")
+                console.print(f"Processed: {result.get('processed_count', 0)}")
+                console.print(f"Success: {result.get('success_count', 0)}")
+                console.print(f"Failed: {result.get('failed_count', 0)}")
+                console.print(f"Run ID: {result.get('run_id', 'N/A')}")
+            else:
+                console.print(f"⚠️ [yellow]Dynamics message processor test requires approval[/yellow]")
+                console.print(f"Error: {result.get('error', 'Unknown error')}")
+                console.print(f"Run ID: {result.get('run_id', 'N/A')}")
+                console.print("Use 'python blc.py guardrails approve' to approve the operation")
+        
         else:
             console.print(f"❌ [red]Unknown action: {action}[/red]")
-            console.print("Available actions: test-webhook, send-email, execute-task")
+            console.print("Available actions: test-webhook, send-email, execute-task, test-message-processor, test-dynamics-processor")
             raise typer.Exit(1)
     
     asyncio.run(run_functions())

@@ -1,0 +1,69 @@
+# Messaging Provider Configuration
+# This file configures the messaging providers used by the system
+
+# Microsoft Graph API Provider (Teams, Email)
+graph:
+  enabled: true
+  tenant_id: "${GRAPH_TENANT_ID}"
+  client_id: "${GRAPH_CLIENT_ID}"
+  client_secret: "${GRAPH_CLIENT_SECRET}"
+  scopes:
+    - "https://graph.microsoft.com/Mail.Send"
+    - "https://graph.microsoft.com/ChannelMessage.Send"
+  supported_channels:
+    - email
+    - teams
+
+# Respond.io Provider (Telegram, SMS, WhatsApp)
+respond:
+  enabled: true
+  api_key: "${RESPOND_API_KEY}"
+  workspace_id: "${RESPOND_WORKSPACE_ID}"
+  base_url: "https://api.respond.io"
+  supported_channels:
+    - telegram
+    - sms
+    - whatsapp
+
+# Future: Custom Provider (for when you build your own)
+# custom:
+#   enabled: false
+#   api_endpoint: "${CUSTOM_API_ENDPOINT}"
+#   api_key: "${CUSTOM_API_KEY}"
+#   supported_channels:
+#     - email
+#     - sms
+
+# Provider Routing Configuration
+routing:
+  # Default provider for each channel type
+  defaults:
+    email: graph
+    teams: graph
+    telegram: respond
+    sms: respond
+    whatsapp: respond
+  
+  # Fallback providers (if primary fails)
+  fallbacks:
+    email: []
+    teams: []
+    telegram: []
+    sms: []
+    whatsapp: []
+
+# Rate Limiting Configuration
+rate_limits:
+  graph:
+    requests_per_minute: 1000
+    requests_per_hour: 10000
+  respond:
+    requests_per_minute: 100
+    requests_per_hour: 1000
+
+# Retry Configuration
+retry:
+  max_attempts: 3
+  backoff_multiplier: 2
+  initial_delay_seconds: 1
+  max_delay_seconds: 60

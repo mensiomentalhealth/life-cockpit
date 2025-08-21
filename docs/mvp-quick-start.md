@@ -158,19 +158,17 @@ python blc.py functions test-webhook
 python blc.py guardrails list
 ```
 
-### **Email Automation**
+### **Multi-Channel Message Automation**
 ```bash
-# 1. Create email automation Logic App
+# 1. Create message automation Logic App
 python blc.py logic-apps create
-# Type: email
-# Name: email-automation
-# Function URL: your-email-function-url
+# Type: scheduled
+# Name: scheduled-messages-processor
+# Function URL: your-message-function-url
 
-# 2. Test email sending
-python blc.py functions send-email
-# To: client@example.com
-# Subject: Follow-up
-# Body: Thank you for your session
+# 2. Test message processing
+python blc.py functions test-message-processor
+# This processes all message types (email, SMS, Teams, etc.)
 
 # 3. Approve if needed
 python blc.py guardrails approve

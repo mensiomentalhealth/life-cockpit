@@ -1,0 +1,33 @@
+{
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "triggers": {
+      "Recurrence": {
+        "recurrence": {
+          "frequency": "Minute",
+          "interval": 5
+        },
+        "type": "Recurrence"
+      }
+    },
+    "actions": {
+      "Call_Dynamics_Message_Processor": {
+        "type": "Http",
+        "inputs": {
+          "method": "POST",
+          "uri": "@{listCallbackUrl()['value']}",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "action": "process_dynamics_messages"
+          }
+        },
+        "runTime": "2017-02-08T17:13:00Z"
+      }
+    },
+    "outputs": {}
+  }
+}

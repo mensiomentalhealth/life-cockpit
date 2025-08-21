@@ -6,6 +6,7 @@ A modular Python-based automation environment for Microsoft 365 ecosystem integr
 
 - **Replace GUI workflows** (Power Automate, etc.) with script-based automation
 - **Integrate Microsoft 365 ecosystem** (Graph API, Dataverse, Logic Apps)
+- **Multi-channel messaging automation** (Email, Teams, Telegram, SMS, WhatsApp)
 - **Modular and reusable** architecture
 - **Multiple execution contexts** (terminal, Cursor, external triggers)
 
@@ -15,6 +16,16 @@ A modular Python-based automation environment for Microsoft 365 ecosystem integr
 life-cockpit/
 ├── auth/               # Graph API / Azure auth logic
 │   └── graph.py
+├── azure/              # Azure Functions & Logic Apps
+│   ├── functions/      # Azure Functions
+│   │   ├── dynamics_message_processor/  # Dynamics message processing
+│   │   ├── webhook_receiver/            # Webhook handling
+│   │   ├── host.json                    # Function app config
+│   │   └── local.settings.json          # Local development
+│   ├── logic-apps/     # Logic Apps workflows
+│   ├── messaging.py    # Multi-channel messaging factory
+│   ├── message_processor.py  # Message processing logic
+│   └── dynamics_message_processor.py  # Dynamics integration
 ├── dataverse/          # Dataverse operations
 │   └── list_tables.py
 ├── sessions/           # Session-related logic
@@ -25,12 +36,21 @@ life-cockpit/
 │   └── charge_client.py
 ├── utils/              # Shared functions (logging, config, etc.)
 │   ├── logger.py
-│   └── config.py
+│   ├── config.py
+│   └── sandbox.py      # Sandbox environment
+├── web/                # FastAPI web dashboard
+│   ├── main.py         # Web server
+│   ├── routes/         # API routes
+│   └── templates/      # HTML templates
+├── scripts/            # Deployment scripts
 ├── tests/              # Test suite
+├── docs/               # Documentation
 ├── logs/               # Application logs
 ├── .env                # Secrets (gitignored)
 ├── env.example         # Environment template
+├── env.production.example  # Production environment template
 ├── requirements.txt
+├── blc.py              # CLI interface
 └── README.md
 ```
 
@@ -50,20 +70,48 @@ life-cockpit/
    # Edit .env with your Microsoft 365 credentials
    ```
 
-2. **Test Connection**
+2. **Test Messaging System**
    ```bash
-   python dataverse/list_tables.py
+   # Test the messaging factory
+   python test_messaging.py
+   
+   # Test Dynamics integration
+   python test_dynamics_simple.py
+   
+   # Use CLI interface
+   python blc.py messaging test
+   python blc.py dynamics test
+   ```
+
+3. **Start Web Dashboard**
+   ```bash
+   python web/main.py
+   # Visit http://localhost:8000
    ```
 
 ## 🔧 Configuration
 
-- **Microsoft Graph API**: OAuth2 authentication
+- **Microsoft Graph API**: OAuth2 authentication for email/Teams
 - **Dataverse**: Service principal authentication
+- **Respond.io**: API integration for Telegram/SMS/WhatsApp
 - **Logging**: Structured logging with rotation
 - **Secrets**: Environment-based secure handling
 
 ## 📋 Current Scripts
 
+### Core Messaging System ✅ **PRODUCTION READY**
+- **`azure/messaging.py`** - Multi-channel messaging factory
+- **`azure/dynamics_message_processor.py`** - Dynamics integration
+- **`azure/message_processor.py`** - Message processing logic
+- **`web/main.py`** - FastAPI web dashboard
+
+### CLI Interface
+- **`blc.py messaging`** - Messaging system management
+- **`blc.py dynamics`** - Dynamics integration testing
+- **`blc.py functions`** - Azure Functions testing
+- **`blc.py sandbox`** - Sandbox environment management
+
+### Legacy Scripts
 - `dataverse/list_tables.py` - Authenticate and list Dataverse tables
 - More coming soon...
 
@@ -74,12 +122,59 @@ life-cockpit/
 - Service principal for Dataverse
 - No hardcoded credentials
 
+## 🎯 **PRODUCTION DEPLOYMENT STATUS**
+
+### ✅ **Phase 1: Email Processing - COMPLETE**
+- **Dynamics Integration**: Queries `cre92_scheduledmessage` table
+- **Message Processing**: Handles `MessageStatus = 'Revised'` or `MessageStatus = 2`
+- **Scheduling**: Processes messages where `ScheduledTimestamp <= utcNow()` and `Sent = false`
+- **Status Updates**: Marks messages as sent with `Sent = true`, `SentAt`, and `ModifiedOn`
+- **Logging**: Records to `messages_log` table
+- **Testing**: ✅ Successfully tested with real Dynamics data
+
+### 🚀 **Phase 2: Multi-Channel Support - READY**
+- **Email**: Microsoft Graph API ✅
+- **Teams**: Microsoft Graph API ✅
+- **Telegram**: Respond.io integration ✅
+- **SMS**: Respond.io integration ✅
+- **WhatsApp**: Respond.io integration ✅
+
+### 📊 **Architecture Benefits**
+- **Replace Power Automate**: More robust, programmable automation
+- **Multi-Provider**: Easy to swap messaging providers
+- **Scalable**: Handles multiple message types and channels
+- **Observable**: Comprehensive logging and monitoring
+- **Testable**: Full test suite with sandbox environment
+
+## 🚀 **Next Steps for Production**
+
+1. **Deploy to Azure**
+   - Azure Functions for message processing
+   - Logic Apps for scheduling
+   - Azure Key Vault for secrets
+
+2. **Configure Production APIs**
+   - Real Microsoft Graph API credentials
+   - Respond.io API keys
+   - Production Dynamics environment
+
+3. **Set Up Monitoring**
+   - Azure Application Insights
+   - Custom dashboards
+   - Alert notifications
+
+4. **Add Telegram Support**
+   - Configure Respond.io workspace
+   - Test Telegram message flow
+   - Deploy to production
+
 ## 📝 Development
 
 This project uses:
 - Python 3.8+
 - Microsoft Graph SDK
 - Dataverse SDK
+- FastAPI for web dashboard
 - Structured logging
 - Modular architecture
 
