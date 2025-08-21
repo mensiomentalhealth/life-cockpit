@@ -3,9 +3,9 @@
 ## Permissions Manifest
 
 - Azure AD Application (Service Principal)
-  - AZURE_CLIENT_ID: configured
-  - AZURE_TENANT_ID: configured
-  - API scopes: Dataverse /.default
+  - AAD_CLIENT_ID: configured
+  - AAD_TENANT_ID: configured
+  - API scopes: Dataverse `/.default`
 - Dataverse Environment
   - App user added to environment
   - Roles: Basic User (min), System Customizer (custom entities), System Administrator (admin only)
@@ -31,6 +31,7 @@
 - Write verbs require explicit command (create, update, delete, note)
 - Retry with exponential backoff; circuit breaker to fail fast on sustained errors
 - Structured logging: attempts, latency, status codes
+ - Guardrails: `safe_operation` decorator enforces dry-run defaults and approval; wrapper returns `{success, dry_run, result, run_id}`
 
 ## Monitoring
 

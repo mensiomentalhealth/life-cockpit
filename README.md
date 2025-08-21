@@ -27,7 +27,11 @@ life-cockpit/
 │   ├── message_processor.py  # Message processing logic
 │   └── dynamics_message_processor.py  # Dynamics integration
 ├── dataverse/          # Dataverse operations
-│   └── list_tables.py
+│   ├── auth.py         # AAD auth for Dataverse (sync)
+│   ├── client.py       # httpx client (sync, pooling)
+│   ├── dev.py          # CRUD + metadata + notes + probe (sync)
+│   ├── circuit_breaker.py
+│   └── list_tables.py  # legacy
 ├── sessions/           # Session-related logic
 │   └── get_sessions.py
 ├── reminders/          # Reminder workflows
@@ -109,7 +113,7 @@ life-cockpit/
 - **`blc.py messaging`** - Messaging system management
 - **`blc.py dynamics`** - Dynamics integration testing
 - **`blc.py functions`** - Azure Functions testing
-- **`blc.py dataverse`** - Dataverse CRUD and diagnostics (see docs/api/dataverse.md)
+- **`blc.py dataverse`** / **`blc.py dv`** - Dataverse CRUD and diagnostics (see `docs/api/dataverse.md`)
 - **`blc.py sandbox`** - Sandbox environment management
 
 #### Dataverse quick commands (dv alias)
@@ -203,6 +207,18 @@ This project uses:
 ### Dataverse Troubleshooting
 
 See `docs/dataverse-troubleshooting.md` for common issues (timeouts, 401/403/404) and diagnostic commands.
+
+### Environment Variables
+
+```bash
+# Dataverse
+DATAVERSE_URL=https://your-org.crm.dynamics.com
+
+# Azure AD (AAD)
+AAD_CLIENT_ID=...
+AAD_CLIENT_SECRET=...
+AAD_TENANT_ID=...
+```
 
 
 ## �� Documentation

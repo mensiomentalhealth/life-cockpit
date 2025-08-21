@@ -6,7 +6,7 @@ This document provides a comprehensive reference for the Life Cockpit API module
 
 ### Core Modules
 - **`auth/`** - Microsoft Graph API authentication
-- **`dataverse/`** - Dataverse operations and data access
+- **`dataverse/`** - Dataverse operations and data access (sync dev layer)
 - **`utils/`** - Shared utilities (config, logging)
 - **`blc.py`** - CLI entry point
 
@@ -39,44 +39,8 @@ Tests what permissions are actually granted in the token.
 ##### `get_current_user() -> Optional[dict]`
 Gets current user information (limited with client credentials flow).
 
-### `auth.dataverse.DataverseAuthManager`
-
-Main authentication manager for Dataverse Web API.
-
-#### Constructor
-```python
-DataverseAuthManager()
-```
-Creates a new Dataverse authentication manager instance.
-
-#### Methods
-
-##### `get_credential() -> ClientSecretCredential`
-Returns the Azure credential for authentication.
-
-##### `get_dataverse_url() -> str`
-Returns the configured Dataverse environment URL.
-
-##### `get_token(impersonate_user_id: Optional[str] = None) -> str`
-Gets access token for Dataverse API with optional user impersonation.
-
-**Parameters:**
-- `impersonate_user_id`: Optional user ID for audit attribution
-
-##### `test_connection(impersonate_user_id: Optional[str] = None) -> bool`
-Tests Dataverse API connection using WhoAmI endpoint.
-
-**Parameters:**
-- `impersonate_user_id`: Optional user ID for audit attribution
-
-##### `get_entity_definitions(impersonate_user_id: Optional[str] = None) -> List[Dict[str, Any]]`
-Gets all entity definitions from Dataverse.
-
-**Parameters:**
-- `impersonate_user_id`: Optional user ID for audit attribution
-
-**Returns:**
-- List of entity dictionaries with keys: `name`, `display_name`, `description`, `entity_type`
+### `dataverse.auth.dv_token() -> str`
+Returns a Dataverse access token using AAD_* env vars and `DATAVERSE_URL`.
 
 ### `auth.graph.get_auth_manager() -> GraphAuthManager`
 Returns the global authentication manager instance (singleton).
@@ -89,34 +53,19 @@ Returns authenticated Graph service client.
 
 ## 📊 Dataverse Module (`dataverse/`)
 
-### `dataverse.list_tables.test_dataverse_connection(impersonate_user_id: Optional[str] = None) -> bool`
-Tests Dataverse connection using WhoAmI endpoint.
+### `dataverse.dev` (sync)
 
-**Parameters:**
-- `impersonate_user_id`: Optional user ID for audit attribution
-
-**Returns:**
-- `True` if connection successful, `False` if failed
-
-### `dataverse.list_tables.get_dataverse_tables(impersonate_user_id: Optional[str] = None) -> List[Dict[str, Any]]`
-Gets all Dataverse tables/entities using the centralized auth manager.
-
-**Parameters:**
-- `impersonate_user_id`: Optional user ID for audit attribution
-
-**Returns:**
-- List of table dictionaries with keys: `name`, `display_name`, `description`, `entity_type`
-
-### `dataverse.list_tables.list_dataverse_tables(impersonate_user_id: Optional[str] = None) -> bool`
-Lists all tables in Dataverse with formatted output.
-
-**Parameters:**
-- `impersonate_user_id`: Optional user ID for audit attribution
-
-**Returns:**
-- `True` if successful, `False` if failed
-
-**Note:** This function prints formatted output to console showing custom and standard entities.
+- `whoami(impersonate: str|None=None) -> dict`
+- `entity_def(logical_name: str) -> dict`
+- `entity_set(logical_name: str) -> str`
+- `get(entity_set: str, id: str, select: str|None=None, expand: str|None=None) -> dict`
+- `query(entity_set: str, filter: str="", select: str="", top: int=10) -> dict`
+- `create(entity_set: str, payload: dict, *, impersonate: str|None=None) -> dict`
+- `update(entity_set: str, id: str, payload: dict, *, impersonate: str|None=None) -> None`
+- `delete(entity_set: str, id: str, *, impersonate: str|None=None) -> None`
+- `create_note(regarding_entity_set: str, regarding_id: str, subject: str, notetext: str, *, impersonate: str|None=None) -> dict`
+- `find_user_systemuserid(upn_or_domainname: str) -> str`
+- `probe() -> dict`
 
 ## ⚙️ Utilities Module (`utils/`)
 
@@ -187,10 +136,10 @@ Dataverse operations.
 Required environment variables (set in `.env` file):
 
 ```bash
-# Microsoft Graph API Configuration
-AZURE_CLIENT_ID=your_client_id_here
-AZURE_CLIENT_SECRET=your_client_secret_here
-AZURE_TENANT_ID=your_tenant_id_here
+# Microsoft Graph API Configuration (if used)
+AAD_CLIENT_ID=your_client_id_here
+AAD_CLIENT_SECRET=your_client_secret_here
+AAD_TENANT_ID=your_tenant_id_here
 
 # Dataverse Configuration
 DATAVERSE_URL=https://your-org.crm.dynamics.com
@@ -257,8 +206,11 @@ python blc.py auth test
 # List users
 python blc.py graph users
 
-# Test Dataverse
-python blc.py dataverse test
+# Dataverse CRUD/diagnostics
+python blc.py dv probe
+python blc.py dv whoami
+python blc.py dv entity-def account
+python blc.py dv query account --top 5 --select "name,accountid"
 ```
 
 ## 🔄 Async Support

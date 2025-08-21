@@ -347,6 +347,15 @@ clinical:
 
 ---
 
-*Last Updated: August 20, 2025*
+### Decorator Wrapper Behavior
+
+- `safe_operation(Classification, name)` wraps the target function and returns a dict:
+  `{ success, dry_run, message, run_id, result }`
+- When the original function itself returns a result dict (e.g., `processed_count`), access it via `wrapper['result']`.
+- The decorator now avoids passing duplicate `dry_run` kwargs. If the caller supplies `dry_run` explicitly, it is respected; otherwise the guardrail default is injected.
+
+---
+
+*Last Updated: August 21, 2025*
 *Safety Guardrails Version: 1.0*
 *Your Professional Healthcare Practice*

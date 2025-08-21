@@ -2,9 +2,9 @@ name: Life Cockpit CI/CD
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ master, main, develop ]
   pull_request:
-    branches: [ main ]
+    branches: [ master, main ]
 
 env:
   PYTHON_VERSION: '3.12'
@@ -49,9 +49,9 @@ jobs:
       run: |
         pytest tests/ --cov=. --cov-report=xml --cov-report=html
       env:
-        AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        AAD_CLIENT_ID: ${{ secrets.AAD_CLIENT_ID }}
+        AAD_CLIENT_SECRET: ${{ secrets.AAD_CLIENT_SECRET }}
+        AAD_TENANT_ID: ${{ secrets.AAD_TENANT_ID }}
         DATAVERSE_URL: ${{ secrets.DATAVERSE_URL }}
     
     - name: Upload coverage to Codecov

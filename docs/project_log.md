@@ -321,3 +321,42 @@ class DataverseAuthManager:
 
 *Last Updated: August 20, 2025*
 *Project Status: Phase 1 (Core Foundation) - 100% Complete*
+
+---
+
+### August 21, 2025 - Dataverse Dev Layer, Resilience, and Tests
+
+#### 🎯 Objectives Completed
+- ✅ Implemented synchronous Dataverse dev layer (`dataverse/auth.py`, `client.py`, `dev.py`)
+- ✅ Added retry with exponential backoff and a circuit breaker (`dataverse/circuit_breaker.py`)
+- ✅ Structured logging for Dataverse calls (attempts, latency, status)
+- ✅ CLI verbs in `blc.py` with `dv` alias: `probe`, `whoami`, `entity-def`, `get`, `query`, `create`, `update`, `delete`, `note`
+- ✅ Tests for dev layer (`tests/test_dataverse_dev.py`) and fixed Dynamics processor test by aligning guardrails wrapper
+- ✅ Documentation updates: API docs, troubleshooting, governance, CI workflow
+
+#### 🔧 Technical Implementation
+- `dataverse/auth.py`: AAD_* env vars; `dv_token()`
+- `dataverse/client.py`: pooled `httpx.Client` with headers, optional `MSCRMCallerID`
+- `dataverse/dev.py`: CRUD + metadata resolution and `probe()`; retry + breaker
+- `dataverse/circuit_breaker.py`: CLOSED/OPEN/HALF_OPEN with thresholds and timeouts
+- `utils/guardrails.py`: `safe_operation` avoids duplicate `dry_run`, returns uniform wrapper
+- `tests/conftest.py`: sandbox and guardrail defaults for tests
+
+#### 🚨 Issues & Fixes
+- 415 on `$metadata` → set `Accept: application/xml`
+- Timeouts on metadata → increased read/connect timeout
+- `KeyError: 'processed_count'` → updated decorator to avoid duplicate `dry_run` and unwrapped result in tests
+- Env vars mismatch → standardized to `AAD_*` for Dataverse
+
+#### 📦 CI/CD
+- Updated `.github/workflows/ci.yml` to include `master` branch and use `AAD_*` secrets for Dataverse
+
+#### 📚 Docs
+- `docs/api/dataverse.md`: sync dev layer, CLI, AAD env, resilience
+- `docs/governance.md`: env var names, guardrails wrapper note
+- `docs/guardrails.md`: decorator wrapper behavior documented
+- `README.md`: Dataverse section updated; dv alias; env vars
+
+#### ✅ Status
+- All tests passing locally
+- Dev layer ready for production usage with read/write verbs (guarded)
