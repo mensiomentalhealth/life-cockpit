@@ -47,7 +47,13 @@ async def test_dynamics_processor():
     
     # Process messages (dry run first)
     print("\n🔍 Testing dry run...")
-    result = await dynamics_message_processor.process_dynamics_messages(dry_run=True)
+    wrapped_result = await dynamics_message_processor.process_dynamics_messages(dry_run=True)
+    
+    # Handle the wrapped result from safe_operation decorator
+    if isinstance(wrapped_result, dict) and 'result' in wrapped_result:
+        result = wrapped_result['result']
+    else:
+        result = wrapped_result
     
     print(f"📊 Dry run results:")
     print(f"   Processed: {result['processed_count']}")
@@ -56,7 +62,13 @@ async def test_dynamics_processor():
     
     # Process messages (real run)
     print("\n🚀 Testing real processing...")
-    result = await dynamics_message_processor.process_dynamics_messages(dry_run=False)
+    wrapped_result = await dynamics_message_processor.process_dynamics_messages(dry_run=False)
+    
+    # Handle the wrapped result from safe_operation decorator
+    if isinstance(wrapped_result, dict) and 'result' in wrapped_result:
+        result = wrapped_result['result']
+    else:
+        result = wrapped_result
     
     print(f"📊 Real run results:")
     print(f"   Processed: {result['processed_count']}")

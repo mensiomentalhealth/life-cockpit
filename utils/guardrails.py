@@ -156,28 +156,24 @@ def safe_operation(classification: Classification, operation_name: str = None):
                            dry_run=is_dry_run,
                            classification=classification.value)
                 
-                if is_dry_run:
-                    # Execute in dry-run mode (no actual changes)
-                    result = await func(*args, **kwargs, dry_run=True)
-                    guardrail_manager.complete_run(run_id, True, result)
-                    return {
-                        'success': True,
-                        'dry_run': True,
-                        'message': 'Operation executed in dry-run mode',
-                        'run_id': run_id,
-                        'result': result
-                    }
-                else:
-                    # Execute actual operation
-                    result = await func(*args, **kwargs, dry_run=False)
-                    guardrail_manager.complete_run(run_id, True, result)
-                    return {
-                        'success': True,
-                        'dry_run': False,
-                        'message': 'Operation executed successfully',
-                        'run_id': run_id,
-                        'result': result
-                    }
+                # Only add dry_run if it's not already in kwargs
+                if 'dry_run' not in kwargs:
+                    kwargs['dry_run'] = is_dry_run
+                elif is_dry_run and not kwargs.get('dry_run'):
+                    # If guardrails say dry_run but caller says not, enforce dry_run
+                    kwargs['dry_run'] = True
+                
+                # Execute the function with the appropriate dry_run setting
+                result = await func(*args, **kwargs)
+                guardrail_manager.complete_run(run_id, True, result)
+                
+                return {
+                    'success': True,
+                    'dry_run': kwargs.get('dry_run', is_dry_run),
+                    'message': 'Operation executed in dry-run mode' if kwargs.get('dry_run') else 'Operation executed successfully',
+                    'run_id': run_id,
+                    'result': result
+                }
                     
             except Exception as e:
                 logger.error("Operation failed", 

@@ -10,55 +10,44 @@ The Dataverse module handles:
 - Data querying and manipulation
 - Connection testing and diagnostics
 
-## 🔧 Functions
+## 🔧 Dev Layer (sync) and CLI
 
-### `get_dataverse_tables() -> List[Dict[str, Any]]`
-Gets actual tables from Dataverse using Web API.
+The new dev layer is synchronous (terminal-first) with OData-correct primitives and optional impersonation.
 
-**Returns:**
-- `List[Dict[str, Any]]`: List of table dictionaries with structure:
-  ```python
-  {
-      "name": "logical_name",
-      "display_name": "Display Name",
-      "description": "Table description",
-      "entity_type": "Custom" | "Standard"
-  }
-  ```
+### Dev Layer Functions (sync)
+- `whoami(impersonate: str|None=None) -> dict`
+- `entity_def(logical_name: str) -> dict  # {EntitySetName, PrimaryIdAttribute, PrimaryNameAttribute}`
+- `entity_set(logical_name: str) -> str`
+- `get(entity_set: str, id: str, select: str|None=None, expand: str|None=None) -> dict`
+- `query(entity_set: str, filter: str="", select: str="", top: int=10) -> dict  # contains @odata.count`
+- `create(entity_set: str, payload: dict, *, impersonate: str|None=None) -> dict  # {id}`
+- `update(entity_set: str, id: str, payload: dict, *, impersonate: str|None=None) -> None`
+- `delete(entity_set: str, id: str, *, impersonate: str|None=None) -> None`
+- `create_note(regarding_logical: str, regarding_id: str, subject: str, notetext: str, *, impersonate: str|None=None) -> dict`
+- `find_user_systemuserid(upn_or_domainname: str) -> str`
+- `probe() -> dict  # token, whoami, metadata`
 
-**Example:**
-```python
-import asyncio
-from dataverse.list_tables import get_dataverse_tables
+### CLI Verbs
 
-async def list_tables():
-    tables = await get_dataverse_tables()
-    print(f"Found {len(tables)} tables:")
-    for table in tables:
-        print(f"  • {table['display_name']} ({table['name']})")
+```bash
+# Probe
+python blc.py dataverse probe
 
-asyncio.run(list_tables())
-```
+# Identity
+python blc.py dataverse whoami [--as-user <systemuserid>]
 
-### `list_dataverse_tables() -> bool`
-Lists all tables in Dataverse using Web API.
+# Entity metadata
+python blc.py dataverse entity-def <logical_name>
 
-**Returns:**
-- `bool`: True if successful, False if failed
+# Records
+python blc.py dataverse get <logical_name> <guid> [--select "..."] [--expand "..."]
+python blc.py dataverse query <logical_name> [--filter "..."] [--select "..."] [--top 20]
 
-**Example:**
-```python
-import asyncio
-from dataverse.list_tables import list_dataverse_tables
-
-async def test_dataverse():
-    success = await list_dataverse_tables()
-    if success:
-        print("✅ Dataverse connection successful!")
-    else:
-        print("❌ Dataverse connection failed")
-
-asyncio.run(test_dataverse())
+# Write (use with care)
+python blc.py dataverse create <logical_name> --data-file payload.json [--as-user <systemuserid>]
+python blc.py dataverse update <logical_name> <guid> --data-file payload.json [--as-user <systemuserid>]
+python blc.py dataverse delete <logical_name> <guid> [--as-user <systemuserid>]
+python blc.py dataverse note <logical_name> <guid> --subject "..." --body-file note.md [--as-user <systemuserid>]
 ```
 
 ## 🔐 Authentication
@@ -229,7 +218,7 @@ async def test_connection():
 asyncio.run(test_connection())
 ```
 
-## 🔍 Debugging
+## 🔍 Debugging & Troubleshooting
 
 ### Enable HTTP Debugging
 ```python
@@ -250,6 +239,10 @@ async def debug_request():
 
 asyncio.run(debug_request())
 ```
+
+### Troubleshooting Guide
+
+See `docs/dataverse-troubleshooting.md` for common fixes (timeouts, 401/403/404, rate limiting) and probes.
 
 ### Token Debugging
 ```python
@@ -292,28 +285,9 @@ def verify_urls():
 verify_urls()
 ```
 
-## 🔄 Async Support
+## 🔄 Notes on Async
 
-All functions are async and must be awaited:
-
-```python
-import asyncio
-from dataverse.list_tables import get_dataverse_tables, list_dataverse_tables
-
-async def main():
-    # Test connection
-    success = await list_dataverse_tables()
-    
-    if success:
-        # Get tables
-        tables = await get_dataverse_tables()
-        print(f"Found {len(tables)} tables")
-    
-    return success
-
-# Run async function
-result = asyncio.run(main())
-```
+Core dev-layer operations are synchronous for terminal ergonomics. For async contexts (e.g., FastAPI handlers), wrap calls in threads or create an async variant using `httpx.AsyncClient` with the same OData semantics.
 
 ## 📊 Configuration
 

@@ -109,7 +109,29 @@ life-cockpit/
 - **`blc.py messaging`** - Messaging system management
 - **`blc.py dynamics`** - Dynamics integration testing
 - **`blc.py functions`** - Azure Functions testing
+- **`blc.py dataverse`** - Dataverse CRUD and diagnostics (see docs/api/dataverse.md)
 - **`blc.py sandbox`** - Sandbox environment management
+
+#### Dataverse quick commands (dv alias)
+
+```bash
+# Probe environment and identity
+python blc.py dv probe
+python blc.py dv whoami
+
+# Entity metadata
+python blc.py dv entity-def account
+
+# Query records
+python blc.py dv query account --top 5 --select "name,accountid"
+
+# Get a specific record
+python blc.py dv get account <guid> --select "name"
+
+# Create a note on a record (impersonate optional)
+echo "Session summary generated." > note.md
+python blc.py dv note account <guid> --subject "Summary" --body-file note.md [--as-user <systemuserid>]
+```
 
 ### Legacy Scripts
 - `dataverse/list_tables.py` - Authenticate and list Dataverse tables
@@ -177,6 +199,10 @@ This project uses:
 - FastAPI for web dashboard
 - Structured logging
 - Modular architecture
+
+### Dataverse Troubleshooting
+
+See `docs/dataverse-troubleshooting.md` for common issues (timeouts, 401/403/404) and diagnostic commands.
 
 
 ## �� Documentation

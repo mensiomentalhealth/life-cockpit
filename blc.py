@@ -102,49 +102,148 @@ def auth(
     asyncio.run(run_auth())
 
 
-@app.command()
+@app.command(name="dataverse")
 def dataverse(
-    action: str = typer.Argument(..., help="Action to perform: list, test, whoami")
+    operation: str = typer.Argument(..., help="Operation: whoami, entity-def, get, query, create, update, delete, note, probe"),
+    logical_name: Optional[str] = typer.Argument(None, help="Logical name"),
+    record_id: Optional[str] = typer.Argument(None, help="Record ID (GUID)"),
+    data_file: Optional[str] = typer.Option(None, "--data-file", help="JSON file with data"),
+    select: Optional[str] = typer.Option(None, "--select", help="OData $select"),
+    expand: Optional[str] = typer.Option(None, "--expand", help="OData $expand"),
+    filter: Optional[str] = typer.Option(None, "--filter", help="OData $filter"),
+    top: int = typer.Option(10, "--top", help="OData $top"),
+    subject: Optional[str] = typer.Option(None, "--subject", help="Note subject"),
+    body_file: Optional[str] = typer.Option(None, "--body-file", help="Note body file"),
+    as_user: Optional[str] = typer.Option(None, "--as-user", help="Impersonate user (systemuserid)"),
 ):
-    """Dataverse operations."""
+    """Basic Dataverse CRUD operations"""
     
-    async def run_dataverse():
-        setup_logging(log_level="INFO")
+    def run_dataverse():
+        # Ensure config is loaded first
+        from utils.config import load_config
+        load_config()
         
-        if action == "list":
-            console.print("[bold]Fetching Dataverse tables...[/bold]")
+        from dataverse.dev import whoami, entity_def, entity_set, get, query, create, update, delete, create_note, probe
+        
+        if operation == "probe":
+            results = probe()
+            console.print("🔍 [bold]Dataverse Connection Probe:[/bold]")
+            for test, result in results.items():
+                console.print(f"   {test}: {result}")
+            return
             
-            from dataverse.list_tables import list_dataverse_tables
-            success = await list_dataverse_tables()
-            if not success:
-                console.print("❌ [red]Failed to list Dataverse tables[/red]")
+        elif operation == "whoami":
+            result = whoami(as_user)
+            console.print(f"👤 [green]User Info:[/green]")
+            console.print(f"   User ID: {result.get('UserId')}")
+            console.print(f"   Business Unit ID: {result.get('BusinessUnitId')}")
+            console.print(f"   Organization ID: {result.get('OrganizationId')}")
+            
+        elif operation == "entity-def":
+            if not logical_name:
+                console.print("[red]❌ Logical name required[/red]")
                 raise typer.Exit(1)
+            result = entity_def(logical_name)
+            console.print(f"📋 [green]Entity Definition for {logical_name}:[/green]")
+            console.print(f"   Entity Set: {result.get('EntitySetName')}")
+            console.print(f"   Primary ID: {result.get('PrimaryIdAttribute')}")
+            console.print(f"   Primary Name: {result.get('PrimaryNameAttribute')}")
+            
+        elif operation == "get":
+            if not logical_name or not record_id:
+                console.print("[red]❌ Logical name and record ID required[/red]")
+                raise typer.Exit(1)
+            entity_set_name = entity_set(logical_name)
+            result = get(entity_set_name, record_id, select, expand)
+            console.print(f"📄 [green]Record:[/green]")
+            console.print(json.dumps(result, indent=2))
+            
+        elif operation == "query":
+            if not logical_name:
+                console.print("[red]❌ Logical name required[/red]")
+                raise typer.Exit(1)
+            entity_set_name = entity_set(logical_name)
+            result = query(entity_set_name, filter, select, top)
+            console.print(f"🔍 [green]Query Results:[/green]")
+            console.print(f"   Count: {result.get('@odata.count', 'unknown')}")
+            console.print(f"   Records: {len(result.get('value', []))}")
+            for record in result.get('value', []):
+                console.print(f"   • {record}")
                 
-        elif action == "test":
-            console.print("[bold]Testing Dataverse connection...[/bold]")
-            
-            from dataverse.list_tables import test_dataverse_connection
-            success = await test_dataverse_connection()
-            if success:
-                console.print("✅ [green]Dataverse connection successful![/green]")
-            else:
-                console.print("❌ [red]Dataverse connection failed[/red]")
+        elif operation == "create":
+            if not logical_name or not data_file:
+                console.print("[red]❌ Logical name and data file required[/red]")
                 raise typer.Exit(1)
-                
-        elif action == "whoami":
-            console.print("[bold]Getting Dataverse user info...[/bold]")
+            entity_set_name = entity_set(logical_name)
+            with open(data_file, 'r') as f:
+                payload = json.load(f)
+            result = create(entity_set_name, payload, impersonate=as_user)
+            console.print(f"✅ [green]Created record with ID: {result['id']}[/green]")
             
-            from dataverse.list_tables import test_dataverse_connection
-            success = await test_dataverse_connection()
-            if not success:
-                console.print("❌ [red]Failed to get Dataverse user info[/red]")
+        elif operation == "update":
+            if not logical_name or not record_id or not data_file:
+                console.print("[red]❌ Logical name, record ID, and data file required[/red]")
                 raise typer.Exit(1)
+            entity_set_name = entity_set(logical_name)
+            with open(data_file, 'r') as f:
+                payload = json.load(f)
+            update(entity_set_name, record_id, payload, impersonate=as_user)
+            console.print(f"✅ [green]Updated record {record_id}[/green]")
+            
+        elif operation == "delete":
+            if not logical_name or not record_id:
+                console.print("[red]❌ Logical name and record ID required[/red]")
+                raise typer.Exit(1)
+            entity_set_name = entity_set(logical_name)
+            delete(entity_set_name, record_id, impersonate=as_user)
+            console.print(f"✅ [green]Deleted record {record_id}[/green]")
+            
+        elif operation == "note":
+            if not logical_name or not record_id or not subject or not body_file:
+                console.print("[red]❌ Logical name, record ID, subject, and body file required[/red]")
+                raise typer.Exit(1)
+            with open(body_file, 'r') as f:
+                notetext = f.read()
+            result = create_note(logical_name, record_id, subject, notetext, impersonate=as_user)
+            console.print(f"📝 [green]Created note with ID: {result['id']}[/green]")
+            
         else:
-            console.print(f"❌ [red]Unknown action: {action}[/red]")
-            console.print("Available actions: list, test, whoami")
+            console.print(f"[red]❌ Unknown operation: {operation}[/red]")
+            console.print("Available operations: whoami, entity-def, get, query, create, update, delete, note, probe")
             raise typer.Exit(1)
     
-    asyncio.run(run_dataverse())
+    run_dataverse()
+
+
+# Short alias: dv
+@app.command(name="dv")
+def dv(
+    operation: str = typer.Argument(..., help="Alias of dataverse command"),
+    logical_name: Optional[str] = typer.Argument(None),
+    record_id: Optional[str] = typer.Argument(None),
+    data_file: Optional[str] = typer.Option(None, "--data-file"),
+    select: Optional[str] = typer.Option(None, "--select"),
+    expand: Optional[str] = typer.Option(None, "--expand"),
+    filter: Optional[str] = typer.Option(None, "--filter"),
+    top: int = typer.Option(10, "--top"),
+    subject: Optional[str] = typer.Option(None, "--subject"),
+    body_file: Optional[str] = typer.Option(None, "--body-file"),
+    as_user: Optional[str] = typer.Option(None, "--as-user"),
+):
+    """Alias for dataverse command."""
+    return dataverse(
+        operation=operation,
+        logical_name=logical_name,
+        record_id=record_id,
+        data_file=data_file,
+        select=select,
+        expand=expand,
+        filter=filter,
+        top=top,
+        subject=subject,
+        body_file=body_file,
+        as_user=as_user,
+    )
 
 
 @app.command()
@@ -447,6 +546,7 @@ def functions(
             raise typer.Exit(1)
     
     asyncio.run(run_functions())
+
 
 @app.command()
 def sandbox(
