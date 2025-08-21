@@ -17,11 +17,12 @@ Life Cockpit is designed around YOUR needs, YOUR patterns, YOUR goals. Every fea
 - **[Development Setup](guides/development-setup.md)** - How to set up your development environment
 - **[Quick Start](examples/quick-start.md)** - Get up and running in 5 minutes
 - **[API Reference](api-reference.md)** - Complete API documentation
+- **[Dataverse API](api/dataverse.md)** - Dataverse dev layer and CLI
 
 ## 🗂️ Directory Structure
 
 - **`auth/`** - Microsoft Graph API authentication
-- **`dataverse/`** - Dataverse operations and data access
+- **`dataverse/`** - Dataverse dev layer (sync CRUD, client, circuit breaker)
 - **`utils/`** - Shared utilities (config, logging)
 - **`tests/`** - Test suite
 - **`logs/`** - Application logs
@@ -83,9 +84,9 @@ Life Cockpit is designed around YOUR needs, YOUR patterns, YOUR goals. Every fea
 - Authentication and Graph API integration
 - CLI interface with Typer
 - Configuration and logging systems
-- Dataverse framework (ready for environment setup)
+- Dataverse dev layer (sync CRUD, retries, circuit breaker, docs, tests)
 
-**Next Phase: Communication Automation**
+**Next Phase: Communication Automation** (in progress)
 - Multi-channel messaging (email, SMS, push notifications)
 - Workflow templates and scheduling
 - Business automation modules
@@ -112,6 +113,6 @@ This is YOUR Life Cockpit. You built it for YOUR needs. You maintain it for YOUR
 
 ---
 
-*Last Updated: August 20, 2025*
+*Last Updated: August 21, 2025*
 *Documentation Version: 2.0*
 *Your Personal Life Cockpit*

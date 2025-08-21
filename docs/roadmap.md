@@ -1,6 +1,6 @@
 # Life Cockpit Development Roadmap
 
-## �� Vision Statement
+## 🎯 Vision Statement
 
 **YOUR Personal Life Management System**
 
@@ -17,14 +17,14 @@ This roadmap prioritizes **working code** over perfect architecture, building fr
 
 #### Core Utilities (Must Work) ✅
 - [x] **Authentication** - OAuth2 with Graph API (working tokens)
-- [x] **Dataverse Connection** - Basic CRUD operations (working with 2,371 entities)
+- [x] **Dataverse Dev Layer** - Sync CRUD primitives + entity resolution + notes + probe
 - [x] **Graph API Integration** - Email, calendar, users
 - [x] **Configuration** - Environment-based with validation
 - [x] **Logging** - Structured logging with file rotation
 
 #### Development Tools (Must Work) ✅
 - [x] **CLI Interface** - Basic commands for testing
-- [x] **Error Handling** - Graceful failures and retries
+- [x] **Resilience** - Retries with backoff, connection pooling, circuit breaker
 - [x] **Testing Framework** - Unit tests for core modules
 - [x] **Dev Environment** - Easy setup and debugging
 
@@ -36,11 +36,11 @@ This roadmap prioritizes **working code** over perfect architecture, building fr
 
 #### Success Criteria ✅ **ACHIEVED**
 - ✅ Can authenticate and connect to all services
-- ✅ Can run basic CRUD operations
+- ✅ Can run Dataverse CRUD operations via `blc.py dv` CLI
 - ✅ CLI works for testing and debugging
 - ✅ Error handling prevents crashes
 - ✅ **Architecture is clean and maintainable**
-- ✅ **Dataverse integration working (2,371 entities accessible)**
+- ✅ **Dataverse dev layer passing tests; CLI and docs updated**
 
 ### Phase 2: Basic Workflows (Q4 2025) - "Make It Useful for YOUR Life"
 **Goal**: Create working automation workflows for YOUR daily needs
@@ -108,10 +108,10 @@ This roadmap prioritizes **working code** over perfect architecture, building fr
 ## 🔧 Implementation Priority
 
 ### Immediate (Next 2 weeks) - YOUR Immediate Needs
-- [ ] **Communication Automation** - Email, text, notifications for YOUR clients
-- [ ] **Workflow Templates** - Reusable automation patterns for YOUR workflows
-- [ ] **Enhanced CLI** - More business-focused commands for YOUR daily use
-- [ ] **Testing Coverage** - Unit and integration tests for YOUR reliability
+- [ ] **Messaging to Production** - Azure Functions + Logic Apps + Key Vault
+- [ ] **Dataverse Business Ops** - Session summaries, notes via `dv note`
+- [ ] **Observability** - App Insights metrics + alerts for DV calls
+- [ ] **CI Stabilization** - Secrets, branch protections, smoke tests
 
 ### Short Term (Next month) - YOUR Business Needs
 - [ ] **Stripe Integration** - Payment processing workflows for YOUR billing
@@ -127,15 +127,15 @@ This roadmap prioritizes **working code** over perfect architecture, building fr
 
 ## 📊 Progress Tracking
 
-### Phase 1 Status: ✅ **COMPLETE (95%)**
+### Phase 1 Status: ✅ **COMPLETE (100%)**
 - **Authentication**: ✅ Complete
 - **Graph API Integration**: ✅ Complete
 - **CLI Interface**: ✅ Complete
 - **Configuration**: ✅ Complete
 - **Logging**: ✅ Complete
-- **Dataverse Framework**: ✅ Ready (needs environment setup)
+- **Dataverse Dev Layer**: ✅ Complete (sync CRUD, retries, breaker, docs, tests)
 
-### Phase 2 Status: 🚀 **READY TO START**
+### Phase 2 Status: 🚀 **IN PROGRESS**
 - **Communication Automation**: 🎯 Next priority for YOUR client communication
 - **Workflow Templates**: 🎯 Next priority for YOUR workflow efficiency
 - **Stripe Integration**: 📋 Planned for YOUR billing needs
@@ -157,6 +157,6 @@ This roadmap prioritizes **working code** over perfect architecture, building fr
 
 ---
 
-*Last Updated: August 20, 2025*
-*Current Status: Phase 1 Complete, Phase 2 Ready*
+*Last Updated: August 21, 2025*
+*Current Status: Phase 1 Complete, Phase 2 Started*
 *YOUR Personal Life Cockpit Roadmap*
