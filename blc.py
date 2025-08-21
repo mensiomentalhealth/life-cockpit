@@ -9,6 +9,8 @@ Usage:
 """
 
 import asyncio
+import os
+import json
 import sys
 from pathlib import Path
 from typing import Optional
@@ -37,6 +39,44 @@ app = typer.Typer(
 # Initialize console for rich output
 console = Console()
 logger = get_logger(__name__)
+@app.command(name="templates")
+def templates_cmd(
+    action: str = typer.Argument(..., help="Action: list, render"),
+    name: Optional[str] = typer.Argument(None, help="Template name (for render)"),
+    data_file: Optional[str] = typer.Option(None, "--data-file", help="JSON file with render context"),
+):
+    """Templates management and rendering."""
+
+    from utils.templates import discover_templates, load_template_by_name, render_template
+
+    if action == "list":
+        tpls = discover_templates()
+        if not tpls:
+            console.print("No templates found in templates/ directory")
+            return
+        console.print("[bold]Templates:[/bold]")
+        for t in tpls:
+            console.print(f"  • {t.meta.name} [dim]({t.rel_path})[/dim]  v{t.meta.version}  type={t.meta.type}")
+        return
+
+    elif action == "render":
+        if not name:
+            console.print("[red]❌ Template name required[/red]")
+            raise typer.Exit(1)
+        context = {}
+        if data_file:
+            with open(data_file, "r", encoding="utf-8") as f:
+                context = json.load(f)
+        tmpl = load_template_by_name(name)
+        output = render_template(tmpl, context)
+        console.print(Panel(output, title=f"Rendered: {name}", expand=True))
+        return
+
+    else:
+        console.print(f"[red]❌ Unknown action: {action}[/red]")
+        console.print("Available: list, render")
+        raise typer.Exit(1)
+
 
 
 @app.command()

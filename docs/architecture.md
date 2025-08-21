@@ -68,6 +68,10 @@ Life Cockpit is a layered, modular Python automation framework designed to repla
                     │ │  Operations │ │
                     │ └─────────────┘ │
                     │ ┌─────────────┐ │
+                    │ │  Templates  │ │
+                    │ │ (templates/)│ │
+                    │ └─────────────┘ │
+                    │ ┌─────────────┐ │
                     │ │   Sessions  │ │
                     │ │  (sessions/)│ │
                     │ └─────────────┘ │

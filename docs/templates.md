@@ -77,9 +77,9 @@ Date: {{ session_date }}
 
 ## How you’ll use it (v1)
 
-- CLI: soon
-  - `blc templates:list`
-  - `blc templates:render <name> --data-file context.json`
+- CLI:
+  - `blc.py templates list`
+  - `blc.py templates render <name> --data-file context.json`
 - Existing verbs integration (planned)
   - `blc dv note <logical> <id> --template session-summary --data-file ctx.json`
   - `blc messaging send --template <name> --to <address> --data-file ctx.json`
