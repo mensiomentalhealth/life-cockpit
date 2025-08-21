@@ -48,6 +48,7 @@ Life Cockpit is designed around YOUR needs, YOUR patterns, YOUR goals. Every fea
 - [Classification System](classification.md) - Verb classification system
 - [Safety Guardrails](guardrails.md) - Safety mechanisms and approval workflows
 - [AI Strategy](ai-strategy.md) - Model-agnostic AI integration and compliance
+- [AI Implementation](ai-implementation.md) - Detailed technical implementation plan
 - [Development Setup](guides/development-setup.md) - Environment setup
 - [Deployment](guides/deployment.md) - Deployment strategies and Azure services
 - [Contributing](contributing.md) - How to contribute (for future collaborators)
