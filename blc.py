@@ -253,6 +253,204 @@ def rollback(
         console.print("Available actions: list, create, execute")
         raise typer.Exit(1)
 
+@app.command()
+def guardrails(
+    action: str = typer.Argument(..., help="Action to perform: list, approve, status")
+):
+    """Safety guardrails management."""
+    
+    from utils.guardrails import list_runs, approve_run, get_run_status
+    
+    if action == "list":
+        console.print("[bold]Active Runs:[/bold]")
+        runs = list_runs()
+        
+        if not runs:
+            console.print("No active runs found")
+            return
+        
+        for run_id, run_data in runs.items():
+            status_color = "green" if run_data.get('status') == 'completed' else "yellow"
+            console.print(f"  • {run_id}")
+            console.print(f"    Operation: {run_data['operation']}")
+            console.print(f"    Classification: {run_data['classification']}")
+            console.print(f"    Status: [{status_color}]{run_data.get('status', 'unknown')}[/{status_color}]")
+            console.print(f"    Created: {run_data['created_at']}")
+            console.print()
+    
+    elif action == "approve":
+        run_id = typer.prompt("Enter run ID to approve")
+        success = approve_run(run_id)
+        
+        if success:
+            console.print(f"✅ [green]Run {run_id} approved[/green]")
+        else:
+            console.print(f"❌ [red]Failed to approve run {run_id}[/red]")
+    
+    elif action == "status":
+        run_id = typer.prompt("Enter run ID to check status")
+        status = get_run_status(run_id)
+        
+        if status:
+            console.print(f"[bold]Run Status: {run_id}[/bold]")
+            console.print(f"  Operation: {status['operation']}")
+            console.print(f"  Classification: {status['classification']}")
+            console.print(f"  Status: {status.get('status', 'unknown')}")
+            console.print(f"  Created: {status['created_at']}")
+            if 'completed_at' in status:
+                console.print(f"  Completed: {status['completed_at']}")
+        else:
+            console.print(f"❌ [red]Run {run_id} not found[/red]")
+    
+    else:
+        console.print(f"❌ [red]Unknown action: {action}[/red]")
+        console.print("Available actions: list, approve, status")
+        raise typer.Exit(1)
+
+@app.command()
+def logic_apps(
+    action: str = typer.Argument(..., help="Action to perform: list, create, delete")
+):
+    """Logic Apps workflow management."""
+    
+    async def run_logic_apps():
+        from azure.logic_apps import logic_apps_cli
+        
+        if action == "list":
+            console.print("[bold]Logic Apps Workflows:[/bold]")
+            workflows = await logic_apps_cli.list_workflows()
+            
+            if not workflows:
+                console.print("No Logic Apps workflows found")
+                return
+            
+            for workflow in workflows:
+                console.print(f"  • {workflow['name']}")
+                console.print(f"    State: {workflow['state']}")
+                console.print(f"    Location: {workflow['location']}")
+                console.print()
+        
+        elif action == "create":
+            workflow_type = typer.prompt("Workflow type", choices=["webhook", "email", "scheduled"])
+            name = typer.prompt("Workflow name")
+            function_url = typer.prompt("Azure Function URL")
+            
+            if workflow_type == "webhook":
+                result = await logic_apps_cli.create_webhook_listener(name, function_url)
+            elif workflow_type == "email":
+                result = await logic_apps_cli.create_email_automation(name, function_url)
+            elif workflow_type == "scheduled":
+                schedule = typer.prompt("Schedule (cron format)", default="0 0 * * *")
+                result = await logic_apps_cli.create_scheduled_task(name, function_url, schedule)
+            
+            console.print(f"✅ [green]Created Logic App: {name}[/green]")
+        
+        elif action == "delete":
+            name = typer.prompt("Workflow name to delete")
+            success = await logic_apps_cli.delete_workflow(name)
+            
+            if success:
+                console.print(f"✅ [green]Deleted Logic App: {name}[/green]")
+            else:
+                console.print(f"❌ [red]Failed to delete Logic App: {name}[/red]")
+        
+        else:
+            console.print(f"❌ [red]Unknown action: {action}[/red]")
+            console.print("Available actions: list, create, delete")
+            raise typer.Exit(1)
+    
+    asyncio.run(run_logic_apps())
+
+@app.command()
+def functions(
+    action: str = typer.Argument(..., help="Action to perform: test-webhook, send-email, execute-task")
+):
+    """Azure Functions testing."""
+    
+    async def run_functions():
+        from azure.functions import functions_manager
+        from utils.guardrails import create_run_id, Classification
+        
+        if action == "test-webhook":
+            entity = typer.prompt("Entity type", default="accounts")
+            operation = typer.prompt("Operation", default="Create")
+            run_id = create_run_id("test-webhook", Classification.BUSINESS)
+            
+            test_data = {"accountid": "test-123", "name": "Test Account"}
+            result = await functions_manager.process_dataverse_webhook(entity, operation, test_data, run_id)
+            
+            console.print(f"✅ [green]Webhook test completed[/green]")
+            console.print(f"Run ID: {run_id}")
+            console.print(f"Result: {result}")
+        
+        elif action == "send-email":
+            to = typer.prompt("Recipient email")
+            subject = typer.prompt("Email subject")
+            body = typer.prompt("Email body")
+            run_id = create_run_id("send-email", Classification.BUSINESS)
+            
+            result = await functions_manager.send_email(to, subject, body, run_id=run_id)
+            
+            console.print(f"✅ [green]Email test completed[/green]")
+            console.print(f"Run ID: {run_id}")
+            console.print(f"Result: {result}")
+        
+        elif action == "execute-task":
+            task = typer.prompt("Task to execute", default="daily_backup")
+            run_id = create_run_id("execute-task", Classification.PERSONAL)
+            
+            result = await functions_manager.execute_scheduled_task(task, run_id)
+            
+            console.print(f"✅ [green]Task execution completed[/green]")
+            console.print(f"Run ID: {run_id}")
+            console.print(f"Result: {result}")
+        
+        else:
+            console.print(f"❌ [red]Unknown action: {action}[/red]")
+            console.print("Available actions: test-webhook, send-email, execute-task")
+            raise typer.Exit(1)
+    
+    asyncio.run(run_functions())
+
+@app.command()
+def sandbox(
+    action: str = typer.Argument(..., help="Action to perform: enable, disable, reset, export, import")
+):
+    """Local sandbox mode management."""
+    
+    async def run_sandbox():
+        from utils.sandbox import sandbox_manager
+        
+        if action == "enable":
+            os.environ["BLC_LOCAL_SANDBOX"] = "true"
+            console.print("✅ [green]Sandbox mode enabled[/green]")
+            console.print("All operations will use mock services")
+        
+        elif action == "disable":
+            os.environ["BLC_LOCAL_SANDBOX"] = "false"
+            console.print("✅ [green]Sandbox mode disabled[/green]")
+            console.print("All operations will use real services")
+        
+        elif action == "reset":
+            await sandbox_manager.reset_data()
+            console.print("✅ [green]Sandbox data reset[/green]")
+        
+        elif action == "export":
+            filepath = typer.prompt("Export file path", default="sandbox_data.json")
+            await sandbox_manager.export_data(filepath)
+            console.print(f"✅ [green]Sandbox data exported to {filepath}[/green]")
+        
+        elif action == "import":
+            filepath = typer.prompt("Import file path")
+            await sandbox_manager.import_data(filepath)
+            console.print(f"✅ [green]Sandbox data imported from {filepath}[/green]")
+        
+        else:
+            console.print(f"❌ [red]Unknown action: {action}[/red]")
+            console.print("Available actions: enable, disable, reset, export, import")
+            raise typer.Exit(1)
+    
+    asyncio.run(run_sandbox())
 
 if __name__ == "__main__":
     app()
