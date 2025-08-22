@@ -70,8 +70,22 @@ def load_config() -> Settings:
     """
     # Load .env file if it exists
     env_file = Path(".env")
-    if env_file.exists():
-        load_dotenv(env_file)
+    if not os.getenv("BLC_SKIP_DOTENV"):
+        if env_file.exists():
+            load_dotenv(env_file)
+    
+    # Normalize env variable names: prefer AAD_*, support AZURE_* during transition
+    # If AAD_* provided but AZURE_* missing, set AZURE_* from AAD_* so existing code keeps working
+    aad_to_azure = {
+        "AAD_CLIENT_ID": "AZURE_CLIENT_ID",
+        "AAD_CLIENT_SECRET": "AZURE_CLIENT_SECRET",
+        "AAD_TENANT_ID": "AZURE_TENANT_ID",
+    }
+    for aad_key, azure_key in aad_to_azure.items():
+        aad_val = os.getenv(aad_key)
+        azure_val = os.getenv(azure_key)
+        if aad_val and not azure_val:
+            os.environ[azure_key] = aad_val
     
     try:
         return Settings()

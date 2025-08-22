@@ -88,6 +88,35 @@ def version():
         f"Microsoft 365 Automation Framework",
         title="🚀 Life Cockpit"
     ))
+@app.command(name="config")
+def config_cmd(
+    action: str = typer.Argument(..., help="Action: check"),
+):
+    """Configuration inspection commands."""
+    from utils.config import load_config
+    load_config()  # ensure normalization
+    if action == "check":
+        console.print("[bold]Effective environment variables (sensitive values hidden):[/bold]")
+        def mask(val: str | None) -> str:
+            if not val:
+                return "<unset>"
+            return val[:3] + "***" if len(val) > 3 else "***"
+        pairs = [
+            ("AAD_CLIENT_ID", os.getenv("AAD_CLIENT_ID")),
+            ("AAD_TENANT_ID", os.getenv("AAD_TENANT_ID")),
+            ("AAD_CLIENT_SECRET", os.getenv("AAD_CLIENT_SECRET")),
+            ("AZURE_CLIENT_ID", os.getenv("AZURE_CLIENT_ID")),
+            ("AZURE_TENANT_ID", os.getenv("AZURE_TENANT_ID")),
+            ("AZURE_CLIENT_SECRET", os.getenv("AZURE_CLIENT_SECRET")),
+            ("DATAVERSE_URL", os.getenv("DATAVERSE_URL")),
+        ]
+        for k, v in pairs:
+            console.print(f"  {k}: {mask(v)}")
+    else:
+        console.print(f"[red]❌ Unknown action: {action}[/red]")
+        console.print("Available: check")
+        raise typer.Exit(1)
+
 
 
 @app.command()
@@ -154,6 +183,7 @@ def dataverse(
     top: int = typer.Option(10, "--top", help="OData $top"),
     subject: Optional[str] = typer.Option(None, "--subject", help="Note subject"),
     body_file: Optional[str] = typer.Option(None, "--body-file", help="Note body file"),
+    template: Optional[str] = typer.Option(None, "--template", help="Template name for note body (uses --data-file as context)"),
     as_user: Optional[str] = typer.Option(None, "--as-user", help="Impersonate user (systemuserid)"),
 ):
     """Basic Dataverse CRUD operations"""
@@ -239,11 +269,30 @@ def dataverse(
             console.print(f"✅ [green]Deleted record {record_id}[/green]")
             
         elif operation == "note":
-            if not logical_name or not record_id or not subject or not body_file:
-                console.print("[red]❌ Logical name, record ID, subject, and body file required[/red]")
+            if not logical_name or not record_id or not subject:
+                console.print("[red]❌ Logical name, record ID, and subject required[/red]")
                 raise typer.Exit(1)
-            with open(body_file, 'r') as f:
-                notetext = f.read()
+
+            # Determine note body: template > body_file
+            if template:
+                try:
+                    from utils.templates import load_template_by_name, render_template
+                    ctx = {}
+                    if data_file:
+                        with open(data_file, 'r', encoding='utf-8') as df:
+                            ctx = json.load(df)
+                    tmpl = load_template_by_name(template)
+                    notetext = render_template(tmpl, ctx)
+                except Exception as e:
+                    console.print(f"[red]❌ Template rendering failed: {e}[/red]")
+                    raise typer.Exit(1)
+            else:
+                if not body_file:
+                    console.print("[red]❌ Provide either --template or --body-file for note body[/red]")
+                    raise typer.Exit(1)
+                with open(body_file, 'r', encoding='utf-8') as f:
+                    notetext = f.read()
+
             result = create_note(logical_name, record_id, subject, notetext, impersonate=as_user)
             console.print(f"📝 [green]Created note with ID: {result['id']}[/green]")
             

@@ -1,6 +1,8 @@
 # Architecture Decision Records (ADR)
 
-This document contains Architecture Decision Records (ADRs) for the Life Cockpit project. ADRs are short text documents that capture important architectural decisions made during the development of the project.
+> **Note**: Architecture Decision Records have moved to `/ADR/`. See [/ADR/index.md](/ADR/index.md) for the current ADR structure and template.
+>
+> This document provides a historical summary of key decisions made before the ADR directory was established. All new decisions should be documented as individual ADR files in the `/ADR/` directory.
 
 ## What is an ADR?
 

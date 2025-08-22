@@ -74,9 +74,9 @@ jobs:
       run: |
         pytest tests/ --cov=. --cov-report=xml
       env:
-        AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        AAD_CLIENT_ID: ${{ secrets.AAD_CLIENT_ID }}
+        AAD_CLIENT_SECRET: ${{ secrets.AAD_CLIENT_SECRET }}
+        AAD_TENANT_ID: ${{ secrets.AAD_TENANT_ID }}
         DATAVERSE_URL: ${{ secrets.DATAVERSE_URL }}
 
   security:
@@ -317,6 +317,6 @@ python blc.py --classification=clinical --approve --clinical session-note create
 
 ---
 
-*Last Updated: August 20, 2025*
+*Last Updated: August 21, 2025*
 *CI/CD Strategy Version: 1.0*
 *Your Professional Healthcare Practice*

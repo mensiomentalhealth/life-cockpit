@@ -125,6 +125,16 @@ This roadmap prioritizes **working code** over perfect architecture, building fr
 - [ ] **Multi-tenant Support** - Environment isolation for YOUR privacy
 - [ ] **Enterprise Features** - Security and compliance for YOUR protection
 
+### Immediate (Next 2 days) — aiOPS thin slice
+- [ ] Restructure CLI: `cli/standard` and gated `cli/dev`; single `lc` binary; `blc` dev-only aliases
+- [ ] Core lib scaffolding: `lib/core/{auth,errors,validation,telemetry}`; deterministic JSON helpers
+- [ ] Implement `reminders.build@v1` end‑to‑end: schemas, `--dry-run`, idempotency, exit codes, golden tests
+- [ ] Operation Log v1: Azure Table Storage with `PartitionKey=<env>-<yyyymmdd>-<verb>`, `RowKey=op_id`; indices plan
+- [ ] Policy hooks: Stripe requires `idempotency_key`; Dataverse writes require `{contact_id,session_id}`; KV‑only secrets
+- [ ] Workflow linter v0: ban business branching; ban `dev.*` commands in workflows
+- [ ] CI gates: ruff, mypy, pytest, golden tests, linter → red blocks
+- [ ] Docs: `docs/cli-conventions.md`, `docs/operations/operation-log.md`, `docs/operations/error-taxonomy.md`, `docs/governance/policy-as-code.md`, `docs/workflow-guidelines.md`, update `index.md`, `architecture.md`
+
 ## 📊 Progress Tracking
 
 ### Phase 1 Status: ✅ **COMPLETE (100%)**
@@ -136,10 +146,9 @@ This roadmap prioritizes **working code** over perfect architecture, building fr
 - **Dataverse Dev Layer**: ✅ Complete (sync CRUD, retries, breaker, docs, tests)
 
 ### Phase 2 Status: 🚀 **IN PROGRESS**
-- **Communication Automation**: 🎯 Next priority for YOUR client communication
-- **Workflow Templates**: 🎯 Next priority for YOUR workflow efficiency
-- **Stripe Integration**: 📋 Planned for YOUR billing needs
-- **Reminder System**: 📋 Planned for YOUR client care
+- CLI standardization (`lc`) and dev surface gating
+- Communication Automation and workflow templates
+- Stripe integration and Reminder System foundations
 
 ## 🎯 Personal Success Metrics
 
